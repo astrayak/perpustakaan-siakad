@@ -13,7 +13,7 @@ class Peminjaman extends Model
         'kode_peminjaman', 'user_id', 'buku_id', 'qr_token',
         'tanggal_pinjam', 'tanggal_jatuh_tempo', 'tanggal_kembali',
         'status', 'diambil_at', 'dikembalikan_at',
-        'denda', 'catatan', 'petugas_id',
+        'denda', 'catatan', 'petugas_id', 'denda_dibayar', 'bukti_pembayaran'
     ];
 
     protected $casts = [

@@ -1,52 +1,58 @@
 @extends('layouts.admin')
 
-@section('title', 'Data Siswa')
+@section('title', 'Log History Login')
 
 @section('content')
-    <div class="mb-4 flex justify-between items-center">
-        <h2 class="text-lg font-semibold text-gray-800">Daftar Siswa Terdaftar</h2>
-        
-        <!-- Form Pencarian -->
-        <form action="{{ route('admin.siswa.index') }}" method="GET" class="flex gap-2">
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Nama, NIS, atau Kelas..." class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#6C5DD3] w-64">
-            <button type="submit" class="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-xl"><i class="fa-solid fa-magnifying-glass"></i></button>
-        </form>
-    </div>
-
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <table class="w-full text-left border-collapse">
-            <thead class="bg-gray-50 border-b border-gray-100">
-                <tr>
-                    <th class="p-4 text-sm font-semibold text-gray-600">Nama Siswa</th>
-                    <th class="p-4 text-sm font-semibold text-gray-600">NIS</th>
-                    <th class="p-4 text-sm font-semibold text-gray-600">Kelas</th>
-                    <th class="p-4 text-sm font-semibold text-gray-600">No. HP</th>
-                    <th class="p-4 text-sm font-semibold text-gray-600 text-center">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($siswas as $s)
-                <tr class="hover:bg-gray-50 border-b border-gray-50">
-                    <td class="p-4 font-medium text-gray-800 flex items-center gap-3">
-                        <div class="w-8 h-8 bg-[#FFB319] rounded-full flex items-center justify-center text-white font-bold text-sm">
-                            {{ substr($s->name, 0, 1) }}
-                        </div>
-                        {{ $s->name }}
-                    </td>
-                    <td class="p-4 text-gray-600">{{ $s->nis ?? '-' }}</td>
-                    <td class="p-4 text-gray-600">{{ $s->kelas ?? '-' }}</td>
-                    <td class="p-4 text-gray-600">{{ $s->no_hp ?? '-' }}</td>
-                    <td class="p-4 text-center">
-                        <a href="{{ route('admin.siswa.show', $s->id) }}" class="bg-indigo-50 text-[#6C5DD3] hover:bg-indigo-100 px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
-                            Lihat Aktivitas
-                        </a>
-                    </td>
-                </tr>
-                @empty
-                <tr><td colspan="5" class="p-8 text-center text-gray-500">Belum ada data siswa.</td></tr>
-                @endforelse
-            </tbody>
-        </table>
+        <div class="p-6 border-b border-gray-100">
+            <h3 class="text-lg font-bold text-gray-800">Riwayat Login Pengguna</h3>
+            <p class="text-sm text-gray-500">Mencatat semua aktivitas login dari Admin dan Siswa.</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                        <th class="p-4 text-sm font-semibold text-gray-600">Waktu Login</th>
+                        <th class="p-4 text-sm font-semibold text-gray-600">Nama Pengguna</th>
+                        <th class="p-4 text-sm font-semibold text-gray-600">Role</th>
+                        <th class="p-4 text-sm font-semibold text-gray-600">IP Address</th>
+                        <th class="p-4 text-sm font-semibold text-gray-600">Device / Browser</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($logs as $log)
+                    <tr class="hover:bg-gray-50 border-b border-gray-50 transition-colors">
+                        <td class="p-4 text-sm text-gray-700">
+                            {{ $log->login_at->format('d M Y, H:i:s') }}
+                            <div class="text-xs text-gray-400">{{ $log->login_at->diffForHumans() }}</div>
+                        </td>
+                        <td class="p-4 font-medium text-gray-800 flex items-center gap-3">
+                            <div class="w-8 h-8 {{ $log->role == 'admin' ? 'bg-[#6C5DD3]' : 'bg-[#FFB319]' }} rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                {{ substr($log->name, 0, 1) }}
+                            </div>
+                            {{ $log->name }}
+                        </td>
+                        <td class="p-4">
+                            <span class="px-2 py-1 rounded text-xs font-bold {{ $log->role == 'admin' ? 'bg-indigo-100 text-indigo-800' : 'bg-yellow-100 text-yellow-800' }}">
+                                {{ strtoupper($log->role) }}
+                            </span>
+                        </td>
+                        <td class="p-4 text-sm text-gray-600 font-mono">{{ $log->ip_address ?? '-' }}</td>
+                        <td class="p-4 text-xs text-gray-500 max-w-xs truncate" title="{{ $log->user_agent }}">
+                            {{ $log->user_agent ?? '-' }}
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="5" class="p-8 text-center text-gray-500">
+                            <i class="fa-solid fa-ghost text-4xl text-gray-300 mb-3"></i>
+                            <p>Belum ada riwayat login.</p>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
-    <div class="mt-4">{{ $siswas->links() }}</div>
+    <div class="mt-4">{{ $logs->links() }}</div>
 @endsection

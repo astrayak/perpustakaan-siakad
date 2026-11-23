@@ -10,33 +10,40 @@ use Illuminate\Support\Str;
 
 class PeminjamanController extends Controller
 {
-    public function index()
+        public function index(Request $request)
     {
-        $peminjamans = Peminjaman::with('buku')
-            ->where('user_id', auth()->id())
-            ->latest()
-            ->paginate(10);
+        $status = $request->get('status', 'semua');
+        $query = Peminjaman::with(['user', 'buku'])->latest();
 
-        return view('siswa.peminjaman.index', compact('peminjamans'));
+        if ($status !== 'semua') {
+            if ($status === 'denda') {
+                // Tampilkan yang memiliki denda > 0 (baik yang sudah dibayar maupun belum)
+                $query->where('denda', '>', 0);
+            } else {
+                $query->where('status', $status);
+            }
+        }
+
+        $peminjamans = $query->paginate(15);
+        return view('siswa.peminjaman.index', compact('peminjamans', 'status'));
     }
 
     public function pinjam(Request $request)
     {
         $request->validate(['buku_id' => 'required|exists:bukus,id']);
-
         $buku = Buku::findOrFail($request->buku_id);
 
         if ($buku->stok_tersedia < 1) {
             return back()->with('error', 'Stok buku habis.');
         }
 
-        $sudahPinjam = Peminjaman::where('user_id', auth()->id())
-            ->where('buku_id', $buku->id)
-            ->whereIn('status', ['menunggu_diambil', 'dipinjam'])
+        // FITUR: Siswa hanya bisa meminjam 1 buku
+        $pinjamanAktif = Peminjaman::where('user_id', auth()->id())
+            ->whereIn('status', ['menunggu_diambil', 'dipinjam', 'terlambat'])
             ->exists();
 
-        if ($sudahPinjam) {
-            return back()->with('error', 'Anda masih memiliki peminjaman aktif untuk buku ini.');
+        if ($pinjamanAktif) {
+            return back()->with('error', 'Anda masih memiliki peminjaman aktif. Selesaikan atau batalkan terlebih dahulu.');
         }
 
         $urutan = Peminjaman::whereDate('created_at', today())->count() + 1;
@@ -47,30 +54,34 @@ class PeminjamanController extends Controller
             'buku_id' => $buku->id,
             'qr_token' => (string) Str::uuid(),
             'tanggal_pinjam' => now(),
-            'tanggal_jatuh_tempo' => now()->addDays(7),
+            'tanggal_jatuh_tempo' => now()->addDays(7), // FITUR: Jatuh tempo 7 hari
             'status' => 'menunggu_diambil',
         ]);
 
         return redirect()->route('siswa.peminjaman.qr', $peminjaman->id)
-            ->with('success', 'Peminjaman berhasil! Tunjukkan QR di bawah ke petugas.');
+            ->with('success', 'Peminjaman berhasil!');
+    }
+
+    public function batalkan(Peminjaman $peminjaman)
+    {
+        // FITUR: Batalkan hanya jika status masih menunggu
+        if ($peminjaman->user_id !== auth()->id() || $peminjaman->status !== 'menunggu_diambil') {
+            abort(403);
+        }
+
+        $peminjaman->update(['status' => 'dibatalkan']);
+        return back()->with('success', 'Peminjaman berhasil dibatalkan.');
     }
 
     public function showQr(Peminjaman $peminjaman)
     {
-        if ($peminjaman->user_id !== auth()->id()) {
-            abort(403);
-        }
-
+        if ($peminjaman->user_id !== auth()->id()) abort(403);
         return view('siswa.peminjaman.qr', compact('peminjaman'));
     }
 
-        // Tambahkan fungsi ini di bawah function showQr
     public function showQrKembali(Peminjaman $peminjaman)
     {
-        if ($peminjaman->user_id !== auth()->id() || $peminjaman->status === 'dikembalikan') {
-            abort(403);
-        }
-
+        if ($peminjaman->user_id !== auth()->id() || $peminjaman->status === 'dikembalikan') abort(403);
         return view('siswa.peminjaman.qr_kembali', compact('peminjaman'));
     }
 }

@@ -15,7 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'siswa' => \App\Http\Middleware\SiswaMiddleware::class,
-            'cek.status.siswa' => \App\Http\Middleware\CekStatusSiswa::class,
+            'cek_status' => \App\Http\Middleware\CekStatusSiswa::class,
         ]);
     })
         //

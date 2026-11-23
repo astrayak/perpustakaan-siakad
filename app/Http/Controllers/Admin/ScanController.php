@@ -62,14 +62,16 @@ class ScanController extends Controller
         }
 
         // CASE 2: Kembalikan buku
+                // CASE 2: Kembalikan buku
         if (in_array($peminjaman->status, ['dipinjam', 'terlambat'])) {
             $jatuhTempo = \Carbon\Carbon::parse($peminjaman->tanggal_jatuh_tempo);
             $hariIni = now();
             $denda = 0;
 
+            // FITUR: Denda jika lebih dari 7 hari (jatuh tempo)
             if ($hariIni->greaterThan($jatuhTempo)) {
                 $hariTerlambat = $jatuhTempo->diffInDays($hariIni);
-                $denda = $hariTerlambat * 1000;
+                $denda = $hariTerlambat * 1000; // Rp 1.000 / hari
             }
 
             $peminjaman->update([
@@ -78,6 +80,7 @@ class ScanController extends Controller
                 'dikembalikan_at' => now(),
                 'denda' => $denda,
                 'petugas_id' => auth()->id(),
+                'catatan' => $request->catatan,
             ]);
 
             $peminjaman->buku->increment('stok_tersedia');

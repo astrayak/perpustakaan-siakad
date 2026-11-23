@@ -10,6 +10,8 @@
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Poppins', sans-serif; background-color: #f4f7fe; }
     </style>
+        <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
 <body class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
@@ -76,19 +78,10 @@
                     @enderror
                 </div>
 
-                <!-- Remember Me & Forgot Password -->
-                <div class="flex items-center justify-between mt-4">
-                    <label for="remember_me" class="inline-flex items-center cursor-pointer">
-                        <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-[#6C5DD3] shadow-sm focus:ring-[#6C5DD3]" name="remember">
-                        <span class="ml-2 text-sm text-gray-600">Ingat Saya</span>
-                    </label>
-
-                    @if (Route::has('password.request'))
-                        <a class="text-sm text-[#6C5DD3] hover:text-[#5a4cb1] font-semibold hover:underline" href="{{ route('password.request') }}">
-                            Lupa Password?
-                        </a>
-                    @endif
-                </div>
+                <!-- Forgot Password -->
+                    <button type="button" onclick="document.getElementById('modalLupaPassword').classList.remove('hidden')" class="text-sm text-[#6C5DD3] hover:text-[#5a4cb1] font-semibold hover:underline">
+                        Lupa Password?
+                    </button>
 
                 <!-- Tombol Login -->
                 <button type="submit" class="w-full bg-[#6C5DD3] hover:bg-[#5a4cb1] text-white font-bold py-3 rounded-xl shadow-lg transition-all transform hover:-translate-y-0.5 mt-6">
@@ -107,6 +100,31 @@
         
         <!-- Footer Text -->
         <p class="text-center text-xs text-gray-400 mt-8">&copy; {{ date('Y') }} Sistem Perpustakaan. All rights reserved.</p>
+    </div>
+
+        <!-- MODAL LUPA PASSWORD -->
+    <div id="modalLupaPassword" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 relative m-4">
+            <button type="button" onclick="document.getElementById('modalLupaPassword').classList.add('hidden')" class="absolute top-5 right-6 text-gray-400 hover:text-gray-800 text-2xl font-bold">&times;</button>
+            
+            <h3 class="text-xl font-bold mb-2 text-gray-800">Lupa Password?</h3>
+            <p class="text-sm text-gray-500 mb-6">Kirim permintaan ke Admin. Admin akan mereset password Anda menjadi <b>siswa123</b>.</p>
+
+            <form action="{{ route('password.request.submit') }}" method="POST">
+                @csrf
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">NIS / Email Anda</label>
+                    <input type="text" name="nis" class="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-[#6C5DD3] bg-gray-50" required placeholder="Masukkan NIS atau Email">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Alasan (Opsional)</label>
+                    <input type="text" name="alasan" class="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-[#6C5DD3] bg-gray-50" placeholder="Contoh: Saya lupa password">
+                </div>
+                <button type="submit" class="w-full bg-[#6C5DD3] hover:bg-[#5a4cb1] text-white font-bold py-3 rounded-xl shadow-lg transition-all">
+                    Kirim Permintaan
+                </button>
+            </form>
+        </div>
     </div>
 
 </body>

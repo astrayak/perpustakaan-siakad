@@ -1,7 +1,1 @@
-
-
-import Alpine from 'alpinejs';
-
-window.Alpine = Alpine;
-
-Alpine.start();
+// Animasi sidebar dikelola langsung oleh master layout agar sinkron antarhalaman

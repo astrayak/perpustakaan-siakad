@@ -10,8 +10,20 @@
         <i class="fa-solid fa-book-open-reader absolute right-10 -bottom-4 text-8xl text-white/10 z-0"></i>
     </div>
 
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h3 class="text-2xl font-bold text-gray-800">Katalog Buku</h3>
+        
+        <!-- FITUR FILTER KATEGORI -->
+        <form action="{{ route('siswa.buku.index') }}" method="GET" class="w-full md:w-auto">
+            <select name="kategori_id" onchange="this.form.submit()" class="w-full border rounded-xl px-4 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-[#6C5DD3] shadow-sm font-medium text-gray-700">
+                <option value="">Semua Kategori</option>
+                @foreach($kategoris as $k)
+                    <option value="{{ $k->id }}" {{ request('kategori_id') == $k->id ? 'selected' : '' }}>
+                        {{ $k->nama_kategori }}
+                    </option>
+                @endforeach
+            </select>
+        </form>
     </div>
 
     <!-- Grid Buku -->
@@ -31,11 +43,17 @@
                     <span class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-[#6C5DD3] text-xs font-bold px-3 py-1.5 rounded-xl shadow-sm z-10">
                         {{ $buku->kategori->nama_kategori }}
                     </span>
+                    
+                    <!-- Badge Digital -->
+                    @if($buku->is_digital)
+                        <span class="absolute top-3 left-3 bg-green-500 text-white text-xs font-bold px-2 py-1.5 rounded-xl shadow-sm z-10">
+                            <i class="fa-solid fa-file-pdf mr-1"></i> Digital
+                        </span>
+                    @endif
                 </a>
                 
                 <!-- DETAIL BUKU -->
                 <div class="p-5 flex-1 flex flex-col">
-                    <!-- Judul Bisa Diklik -->
                     <a href="{{ route('siswa.buku.show', $buku->id) }}" class="hover:text-[#6C5DD3] transition-colors">
                         <h3 class="font-bold text-lg text-gray-800 leading-tight mb-1 line-clamp-2" title="{{ $buku->judul }}">{{ $buku->judul }}</h3>
                     </a>
@@ -63,7 +81,7 @@
             <div class="col-span-full bg-white p-10 rounded-2xl text-center border border-gray-100">
                 <i class="fa-solid fa-box-open text-5xl text-gray-300 mb-4"></i>
                 <h3 class="text-lg font-bold text-gray-700">Belum ada buku</h3>
-                <p class="text-gray-500">Katalog buku masih kosong atau stok sedang habis.</p>
+                <p class="text-gray-500">Katalog buku untuk kategori ini masih kosong.</p>
             </div>
         @endforelse
     </div>
